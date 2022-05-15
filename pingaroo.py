@@ -5,7 +5,7 @@ import sys
 timeouts = 1
 numPings = 10
 
-# Use this to calculate rtt and maintain ertt and devrtt
+# Calculate rtt and maintain ertt and devrtt
 def timeDiff(start, end, rtts, ertt, devrtt):
     a = 0.125
     b = 0.25
