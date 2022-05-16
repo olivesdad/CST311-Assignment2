@@ -29,8 +29,13 @@ while True:
     # If rand is less is than 4, and this not the
     # first "ping" of a group of 10, consider the
     # packet lost and do not respond
+    print('got: '+ message.decode())
     if rand < 4 and pingnum % 10 != 1:
-        continue
+        print("dropping")
+        continue 
     # Otherwise, the server responds
     time.sleep(delay)
-    serverSocket.sendto('"Pong"'.encode(), address)
+    message = 'Pong'+str(pingnum)
+    print("sending: Pong" + str(pingnum))
+    message 
+    serverSocket.sendto(message.encode(), address)
