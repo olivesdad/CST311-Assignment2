@@ -91,7 +91,7 @@ def pingaroo(ip, port, pings):
     for i in range(0, numPings):
         # try block, get a time stamp, send message wait for response, print response increment hit counter
         try:
-            print('sending "' + mess + '" to ' + str(ip) + ":" + str(port))
+            print('sending ' + mess + str(stats.pings+stats.miss +1) + ' to ' + str(ip) + ":" + str(port))
             start = time.perf_counter()
             clientSocket.sendto(mess.encode(), (ip, port))
             modMess, serverAddress = clientSocket.recvfrom(2048)
