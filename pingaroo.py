@@ -5,65 +5,87 @@ import sys
 timeouts = 1
 numPings = 10
 
-# Calculate rtt and maintain ertt and devrtt
-def timeDiff(start, end, rtts, ertt, devrtt):
+# no arrays :(
+class PingStats:
     a = 0.125
     b = 0.25
+    pings = 0
+    miss = 0
+    msTotal = 0
+
+    def __init__(self, minv, maxv, devrtt, ertt):
+        self.minv = minv
+        self.maxv = maxv
+        self.devrtt = devrtt
+        self.ertt = ertt
+
+    def newPing(self, rtt):
+        # update minmax
+        if self.maxv < rtt:
+            self.maxv = rtt
+        elif self.minv > rtt:
+            self.minv = rtt
+
+        # update ertt
+        self.ertt = (
+            rtt if (self.ertt == 0) else (1 - self.a) * self.ertt + (self.a * rtt)
+        )
+
+        # update devrtt
+        self.devrtt = (
+            rtt / 2
+            if self.devrtt == 0
+            else (1 - self.b) * self.devrtt + self.b * abs(rtt - self.ertt)
+        )
+
+        # add ping
+        self.pings = self.pings + 1
+
+        # update avg
+        self.msTotal += rtt
+
+    def timeOut(self):
+        self.miss += 1
+
+    def print(self):
+
+        try:
+            loss = (self.miss / (self.pings + self.miss)) * 100
+            avg = self.msTotal / self.pings
+        except ZeroDivisionError:
+            loss = 100
+            avg = 0
+        print(
+            "\nPING RESULTS: \n"
+            "Attempts:    " + str(self.pings + self.miss) + "\n"
+            "Responsees:  " + str(self.pings) + "\n"
+            "Loss rate:   " + str(round(loss, 4)) + "%\n"
+            "Min rtt:     " + str(self.minv) + "ms\n"
+            "Max rtt:     " + str(self.maxv) + "ms\n"
+            "Average RTT: " + str(round(avg, 4)) + "ms\n"
+            "Timeout:     " + str(round(self.ertt + (self.devrtt), 4)) + "ms"
+        )
+
+
+# Use this to calculate rtt and maintain ertt and devrtt
+def timeDiff(start, end, stats):
 
     diff = round(end * 1000 - start * 1000, 4)
-    rtts.append(diff)
-
-    # update ertt
-    ertt[0] = diff if (ertt[0] == 0) else (1 - a) * ertt[0] + (a * diff)
-    # update devrtt
-    devrtt[0] = (
-        diff / 2 if devrtt[0] == 0 else (1 - b) * devrtt[0] + b * abs(diff - ertt[0])
-    )
+    stats.newPing(diff)
 
     return diff
-
-
-# call at the end to print results of ping test
-def printSummary(pings, rtts, ertt, devrtt):
-    try:
-        loss = (int(pings) - len(rtts)) / int(pings) * 100
-
-        min = timeouts * 1000
-        max = 0
-        sum = 0
-        hit = len(rtts)
-
-        for num in rtts:
-            if num < min:
-                min = num
-            elif num > max:
-                max = num
-            sum += num
-
-        rttAvg = sum / hit
-        print(
-            "\nRESULTS: \n"
-            "Attempts:    " + str(pings) + "\n"
-            "Responsees:  " + str(hit) + "\n"
-            "Loss rate:   " + str(round(loss, 4)) + "%\n"
-            "Min rtt:     " + str(min) + "ms\n"
-            "Max rtt:     " + str(max) + "ms\n"
-            "Average RTT: " + str(round(rttAvg, 4)) + "ms\n"
-            "Timeout:     " + str(round(ertt + (4 * devrtt), 4)) + "ms"
-        )
-    except ZeroDivisionError:
-        print("NO RESPONSE!")
 
 
 # ping loop
 def pingaroo(ip, port, pings):
     clientSocket = socket(AF_INET, SOCK_DGRAM)
     clientSocket.settimeout(timeouts)
-    rtts = []
-    ertt = [0]
-    devrtt = [0]
+
     mess = "Ping"
 
+    stats = PingStats(timeouts * 1000, 0, 0, 0)
+
+    stats.print()
     print("Ping to: " + str(ip) + ":" + str(port) + " Count: " + str(pings) + "\n")
 
     for i in range(0, numPings):
@@ -73,21 +95,22 @@ def pingaroo(ip, port, pings):
             start = time.perf_counter()
             clientSocket.sendto(mess.encode(), (ip, port))
             modMess, serverAddress = clientSocket.recvfrom(2048)
-            diff = str(timeDiff(start, time.perf_counter(), rtts, ertt, devrtt))
+            diff = str(timeDiff(start, time.perf_counter(), stats))
 
             print(
                 "Response: " + modMess.decode() + "\n"
                 "rtt:      " + diff + "ms\n"
-                "est rtt:  " + str(round(ertt[0], 4)) + "ms\n"
-                "dev rtt:  " + str(round(devrtt[0], 4)) + "ms\n"
+                "est rtt:  " + str(round(stats.ertt, 4)) + "ms\n"
+                "dev rtt:  " + str(round(stats.devrtt, 4)) + "ms\n"
             )
 
         # socket throws timeout exception so if we exceet timeout go here and just print timeout
         except timeout:
+            stats.timeOut()
             print("Request Timeout\n")
 
     # do the summary thing
-    printSummary(numPings, rtts, ertt[0], devrtt[0])
+    stats.print()
     clientSocket.close()
 
 
