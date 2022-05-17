@@ -62,6 +62,8 @@ class PingStats:
             "Loss rate:   " + str(round(loss, 4)) + "%\n"
             "Min rtt:     " + str(self.minv) + "ms\n"
             "Max rtt:     " + str(self.maxv) + "ms\n"
+            "ERTT:        " + str(self.ertt) + "ms\n"
+            "DEVRTT:      " + str(self.devrtt) + "ms\n"
             "Average RTT: " + str(round(avg, 4)) + "ms\n"
             "Timeout:     " + str(round(self.ertt + (self.devrtt), 4)) + "ms"
         )

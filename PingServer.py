@@ -6,7 +6,7 @@ import time
 
 #######################
 # set delay in response#
-delay = 0.0
+delay = 0.120
 #######################
 
 from socket import *
@@ -29,13 +29,13 @@ while True:
     # If rand is less is than 4, and this not the
     # first "ping" of a group of 10, consider the
     # packet lost and do not respond
-    print('got: '+ message.decode())
+    print("got: " + message.decode())
     if rand < 4 and pingnum % 10 != 1:
         print("dropping")
-        continue 
+        continue
     # Otherwise, the server responds
     time.sleep(delay)
-    message = 'Pong'+str(pingnum)
+    message = "Pong" + str(pingnum)
     print("sending: Pong" + str(pingnum))
-    message 
+    message
     serverSocket.sendto(message.encode(), address)
