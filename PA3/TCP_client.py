@@ -1,13 +1,20 @@
 from socket import *
 
-serverName = "127.0.0.1"
 serverPort = 12000
 
 
 def main():
 
     clientSocket = socket(AF_INET, SOCK_STREAM)
-    clientSocket.connect((serverName, serverPort))
+    try:
+        serverName='127.0.0.1'
+        clientSocket.connect((serverName, serverPort))
+    except:
+        for name in range(2,10):
+            try:
+                serverName ='10.0.0.'+name
+            except:
+                return 0
 
     # This bit is for the "client has connected"
     serverResponse = clientSocket.recv(1024)
