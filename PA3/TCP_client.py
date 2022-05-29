@@ -14,8 +14,9 @@ def main():
             try:
                 serverName ='10.0.0.'+name
                 clientSocket.connect((serverName, serverPort))
+                break
             except:
-                return 0
+                continue
 
     # This bit is for the "client has connected"
     serverResponse = clientSocket.recv(1024)
