@@ -13,6 +13,7 @@ def main():
         for name in range(2,10):
             try:
                 serverName ='10.0.0.'+name
+                clientSocket.connect((serverName, serverPort))
             except:
                 return 0
 
