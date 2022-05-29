@@ -36,17 +36,7 @@ def main():
     connected = [True]
 
     clientSocket = socket(AF_INET, SOCK_STREAM)
-    try:
-        serverName='127.0.0.1'
-        clientSocket.connect((serverName, serverPort))
-    except NotConnected:
-        for name in range(2,10):
-            try:
-                serverName ='10.0.0.'+name
-                clientSocket.connect((serverName, serverPort))
-                break
-            except:
-                continue
+    clientSocket.connect((serverName, serverPort))
 
     # This bit is for the "client has connected"
     serverResponse = clientSocket.recv(1024)
