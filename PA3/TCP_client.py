@@ -1,3 +1,4 @@
+from http.client import NotConnected
 from socket import *
 
 serverPort = 12000
@@ -9,13 +10,13 @@ def main():
     try:
         serverName='127.0.0.1'
         clientSocket.connect((serverName, serverPort))
-    except:
+    except NotConnected:
         for name in range(2,10):
             try:
                 serverName ='10.0.0.'+name
                 clientSocket.connect((serverName, serverPort))
                 break
-            except:
+            except NotConnected:
                 continue
 
     # This bit is for the "client has connected"

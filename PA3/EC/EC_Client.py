@@ -1,4 +1,5 @@
 from concurrent.futures import thread
+from http.client import NotConnected
 from socket import *
 import signal
 import threading
@@ -38,7 +39,7 @@ def main():
     try:
         serverName='127.0.0.1'
         clientSocket.connect((serverName, serverPort))
-    except:
+    except NotConnected:
         for name in range(2,10):
             try:
                 serverName ='10.0.0.'+name
